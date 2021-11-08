@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "aiocomcrawl"
+version = "0.1.0"
+description = ""
+authors = ["Ruda Porto Filgueiras <rudazz@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^1.8.2"
+aiohttp = "^3.8.0"
+click = "^8.0.3"
+selectolax = "^0.3.5"
+aiofiles = "^0.7.0"
+uvloop = "^0.16.0"
+aiomultiprocess = "^0.9.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+aiocrawler = 'aiocomcrawl.main:cli'
