@@ -27,7 +27,6 @@ async def search_pages(
     index = request.index
     params = request.dict(exclude={"index"}, by_alias=True)
     async with client.get(index.cdx_api, params=params) as response:
-        response.raise_for_status()
         body = await response.text(encoding="utf-8")
         data = json.loads(body)
         return SearchPagesResponse(index=index, url=request.url, pages=data["pages"])
@@ -55,6 +54,5 @@ async def search_index(request: SearchRequest, client: ClientSession) -> List[Re
         f"Start searching index: {index.name} - url_key: {request.url} - params: {params}"
     )
     async with client.get(index.cdx_api, params=params) as response:
-        response.raise_for_status()
         body = await response.text(encoding="utf-8")
         return [Result.parse_raw(result) for result in body.splitlines()]

@@ -3,8 +3,8 @@ import asyncio
 import click
 import uvloop
 
+from aiocomcrawl import pipeline
 from aiocomcrawl.config import settings
-from aiocomcrawl.pipeline import run_pipeline_multiprocess, run_pipeline_single_process
 
 
 @click.command()
@@ -32,20 +32,14 @@ def cli(
     It uses asyncio and multiprocessing to quickly search and download
     crawl data from the Common Crawl public dataset [https://commoncrawl.org].
 
-    When accessing Common Crawl , please you should follow the
+    When accessing Common Crawl, you should follow the
     existing Terms of Use [https://commoncrawl.org/terms-of-use].
     """
 
     uvloop.install()
-    if num_processes > 1:
-        # update the log config
-        asyncio.run(
-            run_pipeline_multiprocess(
-                url, last_indexes=last_indexes, num_processes=num_processes
-            )
-        )
-    else:
-        asyncio.run(run_pipeline_single_process(url, last_indexes=last_indexes))
+    asyncio.run(
+        pipeline.run(url, last_indexes=last_indexes, num_processes=num_processes)
+    )
 
 
 if __name__ == "__main__":

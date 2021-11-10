@@ -161,6 +161,10 @@ class SearchIndexesExecutor:
                         )
 
                 else:
+                    logger.info(
+                        f"Total of {len(items)} results returned from index: "
+                        f"{search_request.index.id} - page: {search_request.page}"
+                    )
                     for item in items:
                         item.index_id = search_request.index.id
                         await output_queue.put(item)

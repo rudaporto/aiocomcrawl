@@ -16,7 +16,7 @@ from aiocomcrawl.search import SearchIndexesExecutor, build_search_requests
 from aiocomcrawl.storage import store_results
 
 
-async def run(search_requests: Union[List[SearchRequest], asyncio.Queue]):
+async def start_workers(search_requests: Union[List[SearchRequest], asyncio.Queue]):
     """Runs the pipeline using asyncio concurrency with three main coroutines:
     - get results: fetch the search requests queue, perform the search and output the results
     - download and parse the body: fetch the results queue, download and parse the body and meta from S3
@@ -35,7 +35,7 @@ async def run(search_requests: Union[List[SearchRequest], asyncio.Queue]):
 
     num_search_requests = search_requests_queue.qsize()
     logger.info(
-        f"Starting pipeline. Total of {num_search_requests} search requests to process."
+        f"Starting pipeline. Total of {num_search_requests} search index requests to process."
     )
 
     async with create_client() as client:
@@ -116,24 +116,21 @@ def chunk_search_requests(
     return chunks
 
 
-async def run_pipeline_single_process(url: str, last_indexes: int = 0):
-    """Runs the pipeline without multiprocessing."""
-    search_requests_queue = asyncio.Queue()
-
-    async with create_client() as client:
-        indexes = await retrieve_indexes(client)
-        if last_indexes and last_indexes < len(indexes):
-            indexes = indexes[:last_indexes]
-
-        # build all search requests and split the results in chunks
-        await build_search_requests(url, indexes, client, search_requests_queue)
-        await run(search_requests_queue)
+async def start_workers_multiprocess(
+    search_requests_queue: asyncio.Queue, num_processes: int
+):
+    """Start workers for each chunks using (aio)multiprocessing."""
+    search_requests_chunks = chunk_search_requests(search_requests_queue, num_processes)
+    async with aiomultiprocess.Pool(
+        processes=num_processes, childconcurrency=1
+    ) as pool:
+        await pool.map(start_workers, search_requests_chunks)
 
 
-async def run_pipeline_multiprocess(
+async def run(
     url: str, last_indexes: int = 0, num_processes: int = settings.NUM_PROCESSES
 ):
-    """Runs the pipeline using (aio)multiprocessing."""
+    """Runs the pipeline."""
     search_requests_queue = asyncio.Queue()
 
     async with create_client() as client:
@@ -143,15 +140,12 @@ async def run_pipeline_multiprocess(
 
         # build all search requests and split the results in chunks
         await build_search_requests(url, indexes, client, search_requests_queue)
-        search_requests_chunks = chunk_search_requests(
-            search_requests_queue, num_processes
-        )
-        if not search_requests_chunks:
+
+        if search_requests_queue.qsize() == 0:
             click.echo(f"Not data found for the url: {url} - indexes : {indexes}")
             sys.exit()
 
-        # start multiple processes
-        async with aiomultiprocess.Pool(
-            processes=num_processes, childconcurrency=1
-        ) as pool:
-            await pool.map(run, search_requests_chunks)
+        if num_processes > 1:
+            await start_workers_multiprocess(search_requests_queue, num_processes)
+        else:
+            await start_workers(search_requests_queue)
