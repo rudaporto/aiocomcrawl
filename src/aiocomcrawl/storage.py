@@ -1,8 +1,9 @@
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import aiofiles
+import orjson
 
 from aiocomcrawl.config import settings
 from aiocomcrawl.log import logger
@@ -10,33 +11,37 @@ from aiocomcrawl.models import Result, ResultBody, ResultMeta
 
 
 async def write_record(
-    out_file: Any, result: Result, result_body: ResultBody, result_meta: ResultMeta
+    out_file: Any,
+    result: Result,
+    result_meta: ResultMeta,
+    result_body: Optional[ResultBody],
 ):
-    """Write one json record per line into the output file."""
+    """Write one json record per line into the output file.
+
+    # todo: support file compression
+    """
+    result.body = result_body
+    result.meta = result_meta
     try:
-        if result_body:
-            result.body = result_body
-        if result_meta:
-            result.meta = result_meta
-        await out_file.write(f"{result.json(exclude_none=True)}\n")
-        # help GC to release memory
-        result.body = None
-        result.meta = None
+        data = result.dict(exclude_none=True)
+        payload = orjson.dumps(data).decode("utf-8")
     except Exception:
         logger.exception(
             f"Failed to serialize and write record. "
             f"Result: {result} - Body: {result_body} - Meta: {result_meta}"
         )
+    else:
+        await out_file.write(f"{payload}\n")
     finally:
-        del result_body
-        del result_meta
-        del result
+        # help GC to release memory
+        result.body = None
+        result.meta = None
 
 
 async def store_results(
     input_queue: asyncio.Queue, output_file_path: Path, stop_event: asyncio.Event
 ):
-    """Consume the queue with the downloaded items and persist the results into a gzip file."""
+    """Consume the queue with the downloaded items and persist the results into a file."""
     async with aiofiles.open(output_file_path, "at") as out_file:
         while True:
             try:

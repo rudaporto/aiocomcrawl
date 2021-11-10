@@ -4,23 +4,23 @@ from typing import Tuple
 
 from selectolax.parser import HTMLParser
 
+from aiocomcrawl.config import settings
 from aiocomcrawl.models import ResultBody, ResultMeta
 
 
 def parse_body_and_meta(
-    body: bytes, mime_detected: str
+    body: bytes, mime_detected: str, html_to_text: bool = settings.HTML_TO_TEXT
 ) -> Tuple[ResultBody, ResultMeta]:
     """Parse the context body and update the result instance."""
     warc_request_meta, response_header, response_body = bytes_to_components(
         BytesIO(body)
     )
-    if mime_detected == "text/html":
+    text_items = None
+    if html_to_text and mime_detected == "text/html":
         text = text_from_html(response_body)
         text_items = [item for item in text.split("\n") if item]
     elif mime_detected == "text/plain":
         text_items = [item for item in response_body.split("\n") if item]
-    else:
-        text_items = None
 
     result_body = ResultBody(
         mime_detected=mime_detected,
@@ -43,7 +43,7 @@ def bytes_to_components(content: BytesIO) -> Tuple[str, str, str]:
     This should work for all records with status code == 200.
     """
     data_unzipped = gzip.GzipFile(fileobj=content).read()
-    data = data_unzipped.decode("utf-8")
+    data = data_unzipped.decode("utf-8", "backslashreplace")
     try:
         warc_request_meta, response_header, response_body = data.strip().split(
             "\r\n\r\n", 2

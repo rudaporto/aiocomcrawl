@@ -40,7 +40,6 @@ def build_and_set_log_config():
                 "level": settings.DEFAULT_LOG_LEVEL,
             }
         },
-        "aiohttp.client": {"level": "DEBUG"},
         "root": {
             "level": settings.DEFAULT_LOG_LEVEL,
             "handlers": ["console", "file", "errors"],
