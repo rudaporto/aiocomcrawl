@@ -51,14 +51,9 @@ class Result(BaseModel):
         return value
 
 
-class SearchRequest(BaseModel):
-    index: Index
-    url: str
-    page: int = 0
-    output: str = "json"
-
-
 class SearchPagesRequest(BaseModel):
+    """Request existing pages on one index for a given url."""
+
     index: Index
     url: str
     show_num_pages: str = Field(alias="showNumPages", default="true", const=True)
@@ -66,6 +61,17 @@ class SearchPagesRequest(BaseModel):
 
 
 class SearchPagesResponse(BaseModel):
+    """Response with the total number of pages in this index for a given url."""
+
     index: Index
     url: str
     pages: int
+
+
+class SearchIndexRequest(BaseModel):
+    """One page that contains records to be fetched."""
+
+    index: Index
+    url: str
+    page: int
+    output: str = "json"

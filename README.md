@@ -3,38 +3,6 @@
 This is an experimental work to create a new utility to download data from the
 [Common Crawl][1] dataset.
 
-## Motivation
-
-I found two main available utilities to search and download crawl data from the [Common Crawl][1] dataset:
-- [cdx_toolkit][2]: more complete utility, exports data into WARC format
-- [comcrawl][3]: more recent utility, simpler to use as a library and supports multithreading
-
-Both tools have good support to search the [Common Crawl][1] dataset.
-
-They both use the [Common Crawl Index Server][4] as a backend to find existing
-pages in each index.
-(There is another [index in Parquet format][5], but it would limit to users with AWS access)
-
-When trying both tools I liked more [comcrawl][3] and it's simplicity.
-But it seems to be not build to scale and download huge amounts of data:
-- the only supports the threaded concurrency model (what about asyncio?)
-- the threads it helps to query the results (io bound), but can slow down the download (cpu bound)
-- it keeps all the results in memory (what about getting [wikipedia.de] data?)
-- it does not check for the amount of pages in the index (small sites will not notice :)
-- it does not support multiprocessing
-- it does not support data persistence
-
-The last points could be implemented by the consumer code, that's true.
-But since it lacks a more robust support to search and process data at scale,
-I decided to implement this new tool.
-
-The main differences in `aiocomcrawl` are:
-- it's focused on search and download the data into files, as fast as possible
-- it uses asyncio for as the concurrent model (more efficient than threads for io bound)
-- it supports multiprocessing (thanks to [aiomultiprocessing][6])
-- it can use all your machine cores to speed up the processing :)
-- it parses the html body when available into text using [selectolax][7]
-
 ## Install
 
 `aiocomcrawl` uses `poetry` to manage it's dependencies.
@@ -55,7 +23,7 @@ After installing `aiocomcrawl` is will provide one script called `aiocrawler`.
 The `aiocrawler` has only one command with the following arguments and options:
 
 ```shell
-$ aiocrawler --help
+$ aiocrawler pipeline --help
 
 Usage: aiocrawler [OPTIONS] URL
 
@@ -103,6 +71,41 @@ SEARCH_INDEX_WORKERS: int = 1
 NUM_PROCESSES: int = 1
 DEFAULT_LOG_LEVEL: str = "INFO"
 ```
+
+## Motivation
+
+I found two main available utilities to search and download crawl data from the [Common Crawl][1] dataset:
+- [cdx_toolkit][2]: more complete utility, exports data into WARC format
+- [comcrawl][3]: more recent utility, simpler to use as a library and supports multithreading
+
+Both tools have good support to search the [Common Crawl][1] dataset.
+
+They both use the [Common Crawl Index Server][4] as a backend to find existing
+pages in each index.
+(There is another [index in Parquet format][5], but it would limit to users with AWS access)
+
+When trying both tools I liked more [comcrawl][3], it's simple and easy to use.
+But it does not handle well the download of pages from bigger sites (even when only one index is envolved):
+
+- it only supports the threaded concurrency model (what about asyncio?)
+- using threads it can query the results in parallel (io bound), but can it slow down the download (cpu bound)
+- it keeps all the results in memory (what about getting [de.wikipedia.org/*] data?)
+- it does not check for the amount of pages in the index (small sites will not notice :)
+- it does not support multiprocessing, this is special important for big sites and/or querying multiple indexes
+- it does not support data persistence, flushing results from memory into the disk
+
+The last points could be implemented by the consumer code, that's true.
+But since it lacks a more robust support to search and process data at scale,
+I decided to implement this new tool.
+
+The main differences in `aiocomcrawl` are:
+
+- it's focused on search and download the data into files, as fast as possible
+- it uses asyncio as the concurrent model (more efficient than threads for io bound)
+- it uses aiohttp as the http client
+- it supports multiprocessing (thanks to [aiomultiprocessing][6])
+- it can use all your machine cores to speed up the processing :)
+- it parses the html body when available into text using [selectolax][7]
 
 ## Stage
 

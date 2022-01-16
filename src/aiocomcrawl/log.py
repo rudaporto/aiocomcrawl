@@ -38,7 +38,8 @@ def build_and_set_log_config():
         "loggers": {
             "aiocomcrawl": {
                 "level": settings.DEFAULT_LOG_LEVEL,
-            }
+            },
+            "backoff": {"handler": "console"},
         },
         "root": {
             "level": settings.DEFAULT_LOG_LEVEL,
