@@ -148,7 +148,7 @@ class SearchIndexesExecutor:
                 items = await self.gateway.search_index(search_request)
             except ClientError:
                 logger.exception(
-                    f"Failed to get results for the search requet: {search_request}"
+                    f"Failed to get results for the search request: {search_request}"
                 )
             else:
                 logger.info(
