@@ -10,7 +10,7 @@ from aiocomcrawl.cdx import CDXGateway
 from aiocomcrawl.client import create_client
 from aiocomcrawl.config import settings
 from aiocomcrawl.download import download_executor
-from aiocomcrawl.log import log_queue_sizes, logger
+from aiocomcrawl.log import logger
 from aiocomcrawl.models import SearchIndexRequest
 from aiocomcrawl.search import SearchIndexesExecutor, build_search_requests
 from aiocomcrawl.storage import store_results
@@ -59,54 +59,45 @@ async def start_workers(
             store_results(to_persist_queue, download_end_event, os.getpid())
         )
 
-        def log_queues():
-            log_queue_sizes(search_requests_queue, results_queue, to_persist_queue)
-
         while not search_indexes_task.done():
             await asyncio.sleep(1)
             logger.debug(
                 f"Search index requests pending: {search_requests_queue.qsize()}"
             )
-
-        # set the search results end event
-        search_end_event.set()
+        else:
+            search_end_event.set()
 
         while not download_task.done():
             await asyncio.sleep(1)
-
-        # set the download end event
-        download_end_event.set()
+        else:
+            download_end_event.set()
 
         while not store_results_task.done():
             await asyncio.sleep(1)
 
-    if exc := search_indexes_task.exception():
-        logger.exception(exc_info=exc)
-
-    if exc := download_task.exception():
-        logger.exception(exc_info=exc)
-
-    if exc := store_results_task.exception():
-        logger.exception(exc_info=exc)
+    for task in [search_indexes_task, download_task, store_results_task]:
+        exc = task.exception()
+        if exc:
+            logger.exception(exc_info=exc)
 
     logger.info("Pipeline finished, exiting.")
     return store_results_task.result()
 
 
 def chunk_search_requests(
-    results_queue: asyncio.Queue, chunk_size: int
+    results_queue: asyncio.Queue, num_chunks: int
 ) -> List[List[SearchIndexRequest]]:
-    """Chunk the search results to be distributed."""
+    """Split the search results into chunks to parallelize the execution."""
     results_size = results_queue.qsize()
-    if results_size < chunk_size:
-        chunk_size = results_size
+    if results_size < num_chunks:
+        num_chunks = results_size
 
     chunks = []
-    for i in range(chunk_size):
+    for i in range(num_chunks):
         chunks.append([])
 
     while results_queue.qsize() > 0:
-        for i in range(chunk_size):
+        for i in range(num_chunks):
             try:
                 search_request = results_queue.get_nowait()
             except asyncio.queues.QueueEmpty:
@@ -155,6 +146,6 @@ async def run(
     if num_processes > 1:
         files = await start_workers_multiprocess(search_requests_queue, num_processes)
     else:
-        files = [await start_workers(search_requests_queue)]
+        files = [*(await start_workers(search_requests_queue))]
 
     return files
