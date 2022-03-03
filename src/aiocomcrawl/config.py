@@ -5,14 +5,13 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
 
-    # TODO: better document each setting
     INDEXES_URI_JSON: str = "https://index.commoncrawl.org/collinfo.json"
-    S3_BUCKET_BASE_URI: str = "https://commoncrawl.s3.amazonaws.com"
+    S3_BUCKET_BASE_URI: str = "http://data.commoncrawl.org"
     RESPONSE_RETRY_CODES: tuple = (500, 503, 504)
     OUTPUT_BASE_PATH: Path = "/tmp"
     MAX_RESULTS_QUEUE_SIZE: int = 10000  # 10K
     MAX_PERSIST_QUEUE_SIZE: int = 10000  # 10K
-    QUEUE_EMPTY_SLEEP_TIME: float = 1  # seconds
+    QUEUE_EMPTY_SLEEP_TIME: float = 0.1  # seconds
     DOWNLOAD_BODY_WORKERS: int = 100
     SEARCH_PAGES_WORKERS: int = 10
     SEARCH_INDEX_WORKERS: int = 10
