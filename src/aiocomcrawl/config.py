@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     MAX_RESULTS_QUEUE_SIZE: int = 10000  # 10K
     MAX_PERSIST_QUEUE_SIZE: int = 10000  # 10K
     QUEUE_EMPTY_SLEEP_TIME: float = 0.1  # seconds
-    DOWNLOAD_BODY_WORKERS: int = 100
-    SEARCH_PAGES_WORKERS: int = 10
+    DOWNLOAD_BODY_WORKERS: int = 10
+    SEARCH_PAGES_WORKERS: int = 1
     SEARCH_INDEX_WORKERS: int = 10
     NUM_PROCESSES: int = 1
     DEFAULT_LOG_LEVEL: str = "INFO"

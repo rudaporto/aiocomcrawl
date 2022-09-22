@@ -68,6 +68,7 @@ class DownloadWorker:
         except ClientError:
             logger.exception(f"Failed to download the result body: {item}")
         else:
+            logger.debug(f"Body downloaded. URL: {item} - Size: {len(body)}")
             result_body, result_meta = parse_body_and_meta(body, item.mime_detected)
             result = item, result_body, result_meta
 
