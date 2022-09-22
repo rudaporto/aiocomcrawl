@@ -19,6 +19,8 @@ mkdocs-material = {version = "^8.1.4", optional = true}
 pymdown-extensions = {version = "^9.1", optional = true}
 tabulate = "^0.8.9"
 backoff = "^1.11.1"
+aiodns = "^3.0.0"
+cchardet = "^2.1.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

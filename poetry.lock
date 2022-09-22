@@ -1,4 +1,15 @@
 [[package]]
+name = "aiodns"
+version = "3.0.0"
+description = "Simple DNS resolver for asyncio"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pycares = ">=4.0.0"
+
+[[package]]
 name = "aiofiles"
 version = "0.8.0"
 description = "File support for asyncio."
@@ -84,12 +95,31 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "cchardet"
+version = "2.1.7"
+description = "cChardet is high speed universal character encoding detector."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "certifi"
 version = "2022.9.14"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = true
 python-versions = ">=3.6"
+
+[[package]]
+name = "cffi"
+version = "1.15.1"
+description = "Foreign Function Interface for Python calling C code."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pycparser = "*"
 
 [[package]]
 name = "charset-normalizer"
@@ -322,6 +352,28 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "pycares"
+version = "4.2.2"
+description = "Python interface for c-ares"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+cffi = ">=1.5.0"
+
+[package.extras]
+idna = ["idna (>=2.1)"]
+
+[[package]]
+name = "pycparser"
+version = "2.21"
+description = "C parser in Python"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
 name = "pydantic"
 version = "1.10.2"
 description = "Data validation and settings management using python type hints"
@@ -552,9 +604,10 @@ docs = ["mkdocs", "mkdocs-material", "pymdown-extensions"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "86ef4e3d7ac653fcd7bd097f548fc97f5b7e501c5005770c2420bdc740ffc04d"
+content-hash = "b85d2b036dfd688edb43e0d8afb509795b1f3db23d64f2242b9367724ae6b391"
 
 [metadata.files]
+aiodns = []
 aiofiles = [
     {file = "aiofiles-0.8.0-py3-none-any.whl", hash = "sha256:7a973fc22b29e9962d0897805ace5856e6a566ab1f0c8e5c91ff6c866519c937"},
     {file = "aiofiles-0.8.0.tar.gz", hash = "sha256:8334f23235248a3b2e83b2c3a78a22674f39969b96397126cc93664d9a901e59"},
@@ -578,7 +631,9 @@ backoff = [
     {file = "backoff-1.11.1-py2.py3-none-any.whl", hash = "sha256:61928f8fa48d52e4faa81875eecf308eccfb1016b018bb6bd21e05b5d90a96c5"},
     {file = "backoff-1.11.1.tar.gz", hash = "sha256:ccb962a2378418c667b3c979b504fdeb7d9e0d29c0579e3b13b86467177728cb"},
 ]
+cchardet = []
 certifi = []
+cffi = []
 charset-normalizer = []
 click = [
     {file = "click-8.1.3-py3-none-any.whl", hash = "sha256:bb4d8133cb15a609f44e8213d9b391b0809795062913b383c62be0ee95b1db48"},
@@ -724,6 +779,11 @@ pluggy = [
 py = [
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
     {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
+]
+pycares = []
+pycparser = [
+    {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
+    {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
 ]
 pydantic = []
 pygments = []
