@@ -58,7 +58,7 @@ class DownloadWorker:
         ClientError,
         jitter=backoff.full_jitter,
         giveup=fatal_code,
-        max_time=settings.CDX_API_RETRY_MAX_WAIT_TIME,
+        max_time=settings.DOWNLOAD_BODY_RETRY_MAX_WAIT_TIME,
     )
     async def process_item(self, item: Result) -> tuple:
         """Process one item and return the result."""

@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     DEFAULT_LOG_LEVEL: str = "INFO"
     HTML_TO_TEXT: bool = False
     HTTP_CLIENT_TRACING: bool = False
-    CDX_API_RETRY_MAX_WAIT_TIME: int = 10
-    DOWNLOAD_BODY_RETRY_MAX_WAIT_TIME: int = 60
+    CDX_API_RETRY_MAX_WAIT_TIME: int = 300
+    DOWNLOAD_BODY_RETRY_MAX_WAIT_TIME: int = 300
 
 
 settings = Settings()
