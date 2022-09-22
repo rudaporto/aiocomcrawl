@@ -62,16 +62,9 @@ class DownloadWorker:
     )
     async def process_item(self, item: Result) -> tuple:
         """Process one item and return the result."""
-        result = None
-        try:
-            body = await download_body_from_s3(item, self.client)
-        except ClientError:
-            logger.exception(f"Failed to download the result body: {item}")
-        else:
-            logger.debug(f"Body downloaded. URL: {item} - Size: {len(body)}")
-            result_body, result_meta = parse_body_and_meta(body, item.mime_detected)
-            result = item, result_body, result_meta
-
+        body = await download_body_from_s3(item, self.client)
+        result_body, result_meta = parse_body_and_meta(body, item.mime_detected)
+        result = item, result_body, result_meta
         return result
 
     async def store_results(self, result: tuple):
@@ -85,10 +78,12 @@ class DownloadWorker:
             item = await get_item(self.input_queue)
             if not item:
                 continue
-            result = await self.process_item(item)
-            if not result:
-                continue
-            await self.store_results(result)
+            try:
+                result = await self.process_item(item)
+            except ClientError:
+                logger.exception(f"Failed to download item: {item}")
+            else:
+                await self.store_results(result)
         else:
             logger.debug(f"Stop event set. Exiting download worker {self.worker_id}")
 
